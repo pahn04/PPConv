@@ -1,0 +1,9 @@
+{
+    "version": "0.0",
+    "scannet_raw": "/data/scannet",
+    "scannet_pickle": "/data/scannet/scannet_pickles",
+    "scene_list": "/workspace_ftp/ppconv/fpconv/utils/scannet_datalist",
+    "s3dis_aligned_raw": "/data/Stanford3dDataset_v1.2_Aligned_Version",
+    "s3dis_data_root": "/data/s3dis_fpconv"
+}
+
