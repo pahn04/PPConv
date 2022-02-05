@@ -50,6 +50,9 @@ Pretrained models can be downloaded through google drive links provided below.
   https://drive.google.com/file/d/17bpmoFBHAXYSbnu7PCJ00HdR2m5Mjq4y/view?usp=sharing
   ```
 
+* ScanNet experiment with fpconv code is under the final test, and the pretrained model will be uploaded within a few weeks.
+
+
 <!-- USAGE -->
 ## Usage
 
