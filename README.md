@@ -18,7 +18,7 @@ This is a repository that contains the implementation of IEEE Access paper ["Pro
 
 This project is based on [PVCNN](https://github.com/mit-han-lab/pvcnn) and [FPConv](https://github.com/lyqun/FPConv). If you need any more detailed information, please refer to their original repositories.
 
-PPCNN++ trained with each dataloader can be found in [pvcnn](https://github.com/pahn04/PPConv/pvcnn_code) and [fpconv](https://github.com/pahn04/PPConv/fpconv_code).
+PPCNN++ trained with each dataloader can be found in [pvcnn](https://github.com/pahn04/PPConv/tree/master/pvcnn_code) and [fpconv](https://github.com/pahn04/PPConv/tree/master/fpconv_code).
 
 
 All the codes in this repository are tested under Python 3.7 and PyTorch 1.6. We recommend the users to download the docker image using the following command and then use this repository.
