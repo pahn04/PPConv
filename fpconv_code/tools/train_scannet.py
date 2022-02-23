@@ -42,7 +42,6 @@ parser.add_argument("--use_sn", action='store_true', default=False)
 parser.add_argument('--lr', type=float, default=0.01)
 parser.add_argument('--lr_decay', type=float, default=0.1)
 parser.add_argument('--lr_clip', type=float, default=0.000001)
-#parser.add_argument('--decay_step_list', type=list, default=[100, 200, 300])
 parser.add_argument('--decay_step_list', nargs='+', type=int)
 parser.add_argument('--weight_decay', type=float, default=0.001)
 parser.add_argument("--resume", type=str, default=None)
@@ -55,8 +54,6 @@ parser.add_argument("--accum", type=int, default=24)
 
 parser.add_argument("--save_interval", type=int, default=500)
 parser.add_argument("--augment", default=False, action="store_true")
-
-parser.add_argument("--loss_type", type=str, choices=['wce', 'focal', 'dice'], default='wce')
 
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
@@ -110,47 +107,9 @@ class CrossEntropyLossWithWeights(torch.nn.Module):
         return torch.mean(weights * loss)
 
 
-class FocalLoss(torch.nn.Module):
-    def __init__(self, alpha=1., gamma=2.):
-        super().__init__()
-        self.alpha = alpha
-        self.gamma = gamma
-        self.cross_entropy_loss = torch.nn.CrossEntropyLoss(reduction='none')
-
-    def forward(self, predict, target):
-        predict = predict.view(-1, NUM_CLASSES).contiguous() # B*N, C
-        target = target.view(-1).contiguous().cuda().long()  # B*N
-
-        loss = self.cross_entropy_loss(predict, target)
-        pt = torch.exp(-loss)
-
-        return (self.alpha * ((1 - pt) ** self.gamma) * loss).mean()
-
-
-class DiceLoss(torch.nn.Module):
-    def init(self):
-        super().__init__()
-
-    def forward(self, predict, target):
-        smooth = 1.
-        predict = predict.view(-1, NUM_CLASSES).contiguous() # B*N, C
-        target = F.one_hot(target.to(torch.int64).view(-1), NUM_CLASSES).contiguous().cuda()
-
-        intersection = (predict * target).sum()
-        predict_sum = torch.sum(predict * predict)
-        target_sum = torch.sum(target * target)
-
-        return 1 - ((2. * intersection + smooth) / (predict_sum + target_sum + smooth))
-
-
 def train_one_epoch(model, dst_loader, optimizer, epoch, tb_log):
     model.train()
-    if args.loss_type == 'wce':
-        loss_func = CrossEntropyLossWithWeights()
-    elif args.loss_type == 'focal':
-        loss_func = FocalLoss(alpha=1., gamma=2.)
-    elif args.loss_type == 'dice':
-        loss_func = DiceLoss()
+    loss_func = CrossEntropyLossWithWeights()
 
     repeat = args.accum // args.batch_size
     log_str(' --- train, accumulate gradients for {} times. Total bacth size is {}.'.format(repeat, args.accum))
@@ -170,10 +129,7 @@ def train_one_epoch(model, dst_loader, optimizer, epoch, tb_log):
         point_set = point_set.cuda().float()
         predict = model(point_set) # B,N,C
 
-        if args.loss_type == 'wce':
-            loss = loss_func(predict, semantic_seg, sample_weight)
-        elif args.loss_type == 'focal' or args.loss_type == 'dice':
-            loss = loss_func(predict, semantic_seg)
+        loss = loss_func(predict, semantic_seg, sample_weight)
         loss_norm = loss / repeat
         loss_norm.backward()
 
@@ -296,7 +252,6 @@ def train(model, train_loader, eval_loader, tb_log, resume_epoch=0):
             continue
         
         # training
-        #log_str('====== epoch {} ======'.format(epoch))
         log_str(f'======== epoch {epoch}, {datetime.now().strftime("%m-%d %H:%M:%S")} ========')
         train_one_epoch(model, train_loader, optimizer, epoch, tb_log)
         lr_scheduler.step(epoch)
@@ -348,9 +303,6 @@ if __name__ == '__main__':
 
     if args.augment:
         train_transform = transform.Compose([transform.RandomRotate(along_z=True),])
-                                             #transform.RandomJitter(sigma=0.01, clip=0.05),
-                                             #transform.RandomScale(scale_low=0.9, scale_high=1.1),])
-                                             #transform.RandomDropColor(color_augment=0.0),])
     else:
         train_transform = None
 
