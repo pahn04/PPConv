@@ -4,8 +4,8 @@ import torch.nn as nn
 
 from modules import SharedMLP, PointNetSAModule, PointNetAModule, PointNetFPModule
 
-#from modules import Conv_pillar_caf as Conv_module
-from modules import Conv_pillar_iwf as Conv_module
+from modules import Conv_pillar_caf as Conv_module
+#from modules import Conv_pillar_iwf as Conv_module
 
 __all__ = ['create_mlp_components', 'create_pointnet_components',
            'create_pointnet2_sa_components', 'create_pointnet2_fp_modules']
